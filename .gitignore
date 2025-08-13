@@ -92,3 +92,4 @@ venv.bak/
 
 # Database files
 *.sqlite
+/.quarto/
