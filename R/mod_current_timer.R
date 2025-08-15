@@ -4,27 +4,27 @@
 #'
 #' @param id,input,output,session Internal parameters for {shiny}.
 #'
-#' @noRd 
+#' @noRd
 #'
-#' @importFrom shiny NS tagList 
+#' @importFrom shiny NS tagList
 mod_current_timer_ui <- function(id) {
   ns <- NS(id)
   tagList(
     bslib::card(
       bslib::card_header("Current timer"),
       bslib::card_body(
-        
+        shiny::selectizeInput(
+          inputId = ns("current_project"),
+          label = "Project",
+          choices = NA,
+          multiple = FALSE
+        ),
+
         shiny::actionButton(
           inputId = ns("start_stop_timer"),
           label = "Start timer"
         ),
 
-        shiny::textOutput(
-          outputId = ns("start_time_label")
-        ),
-        shiny::textOutput(
-          outputId = ns("stop_time_label"),
-        ),
         shiny::textOutput(
           outputId = ns("duration")
         )
@@ -32,12 +32,12 @@ mod_current_timer_ui <- function(id) {
     )
   )
 }
-    
+
 #' current_timer Server Functions
 #'
-#' @noRd 
-mod_current_timer_server <- function(id){
-  moduleServer(id, function(input, output, session){
+#' @noRd
+mod_current_timer_server <- function(id, r) {
+  moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
     # initialise the reactive values
@@ -48,12 +48,15 @@ mod_current_timer_server <- function(id){
       running = FALSE
     )
 
+    # prepare
+
     # respond to button clicks
     shiny::observeEvent(input$start_stop_timer, {
       if (current$running) {
-
         # stop the timer
         current$end_time <- lubridate::now()
+
+        # update the action button
         current$running <- FALSE
         shiny::updateActionButton(
           session = session,
@@ -61,44 +64,25 @@ mod_current_timer_server <- function(id){
           label = "Start timer"
         )
 
-        # # calculate the elapsed time
-        # time_taken <- lubridate::as.period(
-        #   lubridate::interval(
-        #     start = current$start_time |> lubridate::ymd_hms(),
-        #     end = current$end_time |> lubridate::ymd_hms()
-        #   )
-        # )
-
-
-        # update the reactive value
-        #current$duration <- time_taken |> as.character()
-
-        # update the labels
-        # output$stop_time_label <- shiny::renderText(current$end_time)
-        # output$duration <- shiny::renderText(current$duration)
-
-        # record this time
+        # record the timer in the database
         add_timer_record(
-          project_id = 1,
+          project_id = input$current_project,
           start = current$start_time |> lubridate::as_datetime(),
           end = current$end_time |> lubridate::as_datetime(),
           body = ""
         )
 
+        # update the global reactive values
+        r$timer_added <- TRUE
       } else {
-
         # start the timer
-        current$start_time <- lubridate::now() 
+        current$start_time <- lubridate::now()
         current$running <- TRUE
         shiny::updateActionButton(
           session = session,
           inputId = "start_stop_timer",
           label = "Stop timer"
         )
-
-        # update the start time label
-        output$start_time_label <- shiny::renderText(current$start_time |> format("%Y-%m-%d %H:%M:%S"))
-
       }
     })
 
@@ -110,34 +94,36 @@ mod_current_timer_server <- function(id){
       auto_invalidate() # trigger the timer
 
       if (current$running) {
-
-        # calculate the duration
-        time_taken <- 
-          lubridate::as.period(
-            lubridate::interval(
-              start = current$start_time |> lubridate::round_date(unit = "second"),
-              end = lubridate::now() |> lubridate::round_date(unit = "second")
-            ) 
-          ) |> 
+        # calculate the current duration
+        time_taken <- calculate_duration(
+          .start_time = current$start_time |>
+            lubridate::round_date(unit = "second"),
+          .end_time = lubridate::now() |> lubridate::round_date(unit = "second")
+        ) |>
           as.character()
-        
+
         # use the value
         time_taken
-
       } else {
         "Timer not running yet"
       }
-      
     })
-  })
+
+    # update the list of projects
+    shiny::observeEvent(r$project_added, {
+      shiny::updateSelectizeInput(
+        inputId = "current_project",
+        choices = get_project_choices()
+      )
+    })
+  }) # end of module server
 }
-    
+
 ## To be copied in the UI
 # mod_current_timer_ui("current_timer_1")
-    
+
 ## To be copied in the server
 # mod_current_timer_server("current_timer_1")
-
 
 # testing module
 ui <- bslib::page_fluid(
