@@ -8,72 +8,47 @@ app_ui <- function(request) {
   tagList(
     # Leave this function for adding external resources
     golem_add_external_resources(),
-    
+
     # Your application UI logic
-    bslib::page_sidebar(
+    bslib::page_fillable(
       title = "timeR",
 
-      # sidebar controls ----
-      sidebar = bslib::sidebar(
-        open = "closed"
-      ),
+      # # sidebar controls ----
+      # sidebar = bslib::sidebar(
+      #   open = "closed",
+      #   bslib::side
+      # ),
 
       # main content ----
+
       ## current ----
-      # bslib::card(
-      #   bslib::card_header("Timer"),
-      #   bslib::card_body(
-      #     shiny::actionButton(
-      #       inputId = "start_timer",
-      #       label = "Start",
-      #     ),
-      #     shiny::textOutput(
-      #       outputId = "start_time_label"
-      #     ),
-      #     shiny::actionButton(
-      #       inputId = "stop_timer",
-      #       label = "Stop"
-      #     )
-      #   )
-      # ),
-      # call the module ui
+      # call the 'current timer' module ui
       mod_current_timer_ui("current_timer_1"),
 
       ## navset ----
       bslib::navset_card_underline(
-
         ### nav calendar ----
         bslib::nav_panel(
           title = "Calendar",
-          toastui::calendarOutput(outputId = "timer_calendar", height = "90%")
+          # call the 'calendar view' module ui
+          mod_calendar_view_ui("calendar_view_1")
         ),
 
         ### nav timesheet ----
         bslib::nav_panel(
           title = "Timesheet",
           shiny::p("Placeholder for timesheet")
+        ),
+
+        ### nav data ----
+        bslib::nav_panel(
+          title = "Data",
+          #shiny::p("Placeholder for data")
+          # call the 'data view' module ui
+          mod_data_view_ui("data_view_1")
         )
-      ),
-
-      # bslib::card(
-      #   bslib::card_header("Calendar"),
-      #   toastui::calendarOutput(outputId = "timer_calendar", height = "90%")
-      # ),
-
-      # bslib::card(
-      #   bslib::card_title("Dates"),
-      #   shiny::verbatimTextOutput("dates")
-      # ),
-
-      # bslib::card(
-      #   bslib::card_title("Clicked schedule"),
-      #   shiny::verbatimTextOutput("click")
-      # )
+      )
     )
-
-    # fluidPage(
-    #   golem::golem_welcome_page() # Remove this line to start building your UI
-    # )
   )
 }
 
