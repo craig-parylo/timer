@@ -455,8 +455,8 @@ get_timer_records_for_calendar <- function(
     get_timer_records(.id_date = .id_date, .id_week = .id_week) |> 
     dplyr::mutate(
       # ensure datetimes are recognised
-      start = start |> lubridate::as_datetime(),
-      end = end |> lubridate::as_datetime()
+      start = start |> lubridate::as_datetime(tz = NULL),
+      end = end |> lubridate::as_datetime(tz = NULL)
     ) |> 
     # add in some project details
     dplyr::left_join(
@@ -528,6 +528,72 @@ get_project_records_for_calendar <- function(
         dplyr::everything(),
         .fns = as.character
       )
+    )
+  
+  # return the result
+  return(df_return)
+
+}
+
+get_timer_records_for_table <- function() {
+
+}
+
+#' Get `timers` records for a table
+#' 
+#' @description
+#' Returns a tibble of formatted data ready for use with the datagrid display
+#' 
+#' @details
+#' The `toastui::datagrid()` is used to display a list of timer records. This
+#' function loads the data and prepares it for display by converting `start`
+#' and `end` variables to timestamps.
+#' 
+#' @seealso
+#' [get_timer_records()] for the underlying function to query timers from the
+#' the database.
+#' 
+#' [get_project_records()] for the underlying function to query projects from
+#' the database.
+#'
+#' @param .id_date Numeric - an ID value that uniquely identifies a date, in the format 'YYYYMMDD', 
+#' @param .id_week Numeric - an ID value that uniquely identifies a week, in the format 'YYYYWW'
+#' 
+#' @returns Tibble of `timers` records
+#'
+#' @export
+#' @examples
+#' # return all timer records
+#' get_timer_records_for_table()
+#' 
+#' # return the timer records for this week
+#' get_timer_records_for_table(.id_week = get_id_week(lubridate::now()))
+#' 
+#' # return the timer records for today
+#' get_timer_records_for_table(.id_day = get_id_day(lubridate::now()))
+get_timer_records_for_table <- function(
+  .id_date = NA, 
+  .id_week = NA
+) {
+
+  # get a list of projects
+  df_projects <-
+    get_project_records()
+  
+  # prepare the outcome object
+  df_return <-
+    # get the timer records as a tibble
+    get_timer_records(.id_date = .id_date, .id_week = .id_week) |> 
+    dplyr::mutate(
+      # ensure datetimes are recognised
+      start = start |> lubridate::as_datetime(tz = NULL),
+      end = end |> lubridate::as_datetime(tz = NULL)
+    ) |> 
+    # add in some project details
+    dplyr::left_join(
+      y = df_projects |> 
+        dplyr::select('calendarId' = 'id', 'title' = 'name'),
+      by = dplyr::join_by('calendarId' == 'calendarId')
     )
   
   # return the result
