@@ -16,7 +16,9 @@ Imports:
     here,
     lubridate,
     RSQLite,
+    scales,
     shiny,
+    shinyWidgets,
     tibble,
     toastui
 Encoding: UTF-8
