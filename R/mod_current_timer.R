@@ -13,21 +13,25 @@ mod_current_timer_ui <- function(id) {
     bslib::card(
       bslib::card_header("Current timer"),
       bslib::card_body(
-        shiny::selectizeInput(
-          inputId = ns("current_project"),
-          label = "Project",
-          choices = NA,
-          multiple = FALSE
-        ),
+        fillable = FALSE,
+        bslib::layout_column_wrap(
+          fixed_width = FALSE,
+          shiny::selectizeInput(
+            inputId = ns("current_project"),
+            label = "Project",
+            choices = NA,
+            multiple = FALSE
+          ),
 
-        shiny::actionButton(
-          inputId = ns("start_stop_timer"),
-          label = "Start timer"
-        ),
+          shiny::actionButton(
+            inputId = ns("start_stop_timer"),
+            label = "Start timer"
+          ),
 
-        shiny::textOutput(
-          outputId = ns("duration")
-        )
+          shiny::textOutput(
+            outputId = ns("duration")
+          )
+        ) # end of container
       )
     )
   )
