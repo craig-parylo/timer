@@ -24,33 +24,6 @@ mod_calendar_view_server <- function(id, r) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    # output$timer_calendar <-
-    #   toastui::renderCalendar({
-    #     # create a calendar view
-    #     toastui::calendar(
-    #       get_timer_records_for_calendar(), # using records from the database
-    #       navigation = TRUE,
-    #       view = "week",
-    #       defaultDate = Sys.Date(),
-    #       useCreationPopup = FALSE,
-    #       isReadOnly = TRUE
-    #     ) |>
-    #       # define some options for the 'week' view
-    #       toastui::cal_week_options(
-    #         startDayOfWeek = 1,
-    #         workweek = FALSE,
-    #         narrowWeekend = FALSE,
-    #         showNowIndicator = TRUE,
-    #         eventView = "time"
-    #       ) |>
-    #       # set the timezone
-    #       # toastui::cal_timezone(timezoneName = "Europe/London") |>
-    #       # define properties for projects, such as colours and titles
-    #       toastui::cal_props(
-    #         get_project_records_for_calendar()
-    #       )
-    #   })
-
     # functions
     get_calendar <- function() {
       cal <-
@@ -76,29 +49,6 @@ mod_calendar_view_server <- function(id, r) {
 
       return(cal)
     }
-
-    # reactives
-    # calendar_reactive <-
-    #   shiny::reactive({
-
-    #     # only complute when running is TRUE
-    #     #req(!current$running)
-    #     #req(ns(!current$running))
-
-    #     # only update when timer_added is TRUE
-    #     req(r$timer_added)
-
-    #     print("calendar_reactive called")
-
-    #     # reset the global reactiveValues
-    #     r$timer_added <- FALSE
-
-    #     # prepare a calendar
-    #     cal <- get_calendar()
-
-    #     # return this calendar
-    #     return(cal)
-    #   })
 
     # testing observer
     shiny::observeEvent(r$timer_added, {
